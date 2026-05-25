@@ -41,6 +41,7 @@ interface Node {
     /**
      * Deletes an instance from the node.
      * @param instance The instance to delete.
+     * @return A [CompletableFuture] that completes when the instance is deleted.
      */
-    fun deleteInstance(instance: Instance)
+    fun deleteInstance(instance: Instance): CompletableFuture<Void>
 }

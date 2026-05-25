@@ -22,6 +22,7 @@ interface InstanceManagerAPI {
 
     /**
      * Refreshes the node list to keep track of any nodes that have been added or removed.
+     * @return A [CompletableFuture] that completes with the updated node list.
      */
-    fun refreshNodes()
+    fun refreshNodes(): CompletableFuture<Map<UUID, Node>>
 }

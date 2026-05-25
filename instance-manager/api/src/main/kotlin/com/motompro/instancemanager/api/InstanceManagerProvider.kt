@@ -2,11 +2,13 @@ package com.motompro.instancemanager.api
 
 object InstanceManagerProvider {
 
-    private lateinit var instance: InstanceManagerAPI
+    private var _instance: InstanceManagerAPI? = null
+
+    val instance: InstanceManagerAPI
+        get() = _instance ?: throw IllegalStateException("InstanceManagerAPI not registered")
 
     fun register(impl: InstanceManagerAPI) {
-        instance = impl
+        check(_instance == null) { "InstanceManagerAPI already registered" }
+        _instance = impl
     }
-
-    fun get(): InstanceManagerAPI = instance
 }

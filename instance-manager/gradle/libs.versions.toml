@@ -1,7 +1,11 @@
 [versions]
+jackson = "2.21.3"
 jvm = "21"
-kotlin = "2.2.0"
+kotlin = "2.2.21"
+shadow = "8.3.0"
 velocity = "3.5.0-SNAPSHOT"
 
 [libraries]
+jackson = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+jackson-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
