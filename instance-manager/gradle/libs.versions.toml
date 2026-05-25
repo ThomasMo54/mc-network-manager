@@ -1,0 +1,7 @@
+[versions]
+jvm = "21"
+kotlin = "2.2.0"
+velocity = "3.5.0-SNAPSHOT"
+
+[libraries]
+velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
