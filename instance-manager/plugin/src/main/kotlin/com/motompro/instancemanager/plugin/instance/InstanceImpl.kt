@@ -25,34 +25,65 @@ class InstanceImpl(
     override val velocityServer: RegisteredServer
         get() = proxy.getServer(uuid.toString()).get()
 
+    override val isOnline: CompletableFuture<Boolean>
+        get() = pterodactylService.getInstanceApplicationStatus(this).thenApply { it == "null" }
+
     override val isRunning: CompletableFuture<Boolean>
         get() = pterodactylService.getInstanceStatus(this).thenApply { it == "running" }
 
     override fun start(): CompletableFuture<Void> {
         return pterodactylService.sendPowerCommand(this, "start").thenAccept {
+            var polls = 0
+            while (polls < STATUS_POLLING_TIMEOUT && !isRunning.join()) {
+                polls++
+                Thread.sleep(3000)
+            }
+            if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
             logger.info("Started instance $uuid")
         }
     }
 
     override fun stop(): CompletableFuture<Void> {
         return pterodactylService.sendPowerCommand(this, "stop").thenAccept {
+            var polls = 0
+            while (polls < STATUS_POLLING_TIMEOUT && isRunning.join()) {
+                polls++
+                Thread.sleep(3000)
+            }
+            if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
             logger.info("Stopped instance $uuid")
         }
     }
 
     override fun restart(): CompletableFuture<Void> {
         return pterodactylService.sendPowerCommand(this, "restart").thenAccept {
+            var polls = 0
+            while (polls < STATUS_POLLING_TIMEOUT && !isRunning.join()) {
+                polls++
+                Thread.sleep(3000)
+            }
+            if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
             logger.info("Restarted instance $uuid")
         }
     }
 
     override fun kill(): CompletableFuture<Void> {
         return pterodactylService.sendPowerCommand(this, "kill").thenAccept {
+            var polls = 0
+            while (polls < STATUS_POLLING_TIMEOUT && isRunning.join()) {
+                polls++
+                Thread.sleep(3000)
+            }
+            if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
             logger.info("Killed instance $uuid")
         }
     }
 
     override fun sendCommand(command: String): CompletableFuture<Void> {
         return pterodactylService.sendCommand(this, command)
+    }
+
+    companion object {
+        private const val STATUS_POLLING_TIMEOUT = 100
     }
 }

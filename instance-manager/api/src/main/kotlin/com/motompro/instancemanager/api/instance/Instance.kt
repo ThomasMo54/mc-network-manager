@@ -36,6 +36,11 @@ interface Instance {
     val velocityServer: RegisteredServer
 
     /**
+     * Whether the instance is online.
+     */
+    val isOnline: CompletableFuture<Boolean>
+
+    /**
      * Whether the instance is currently running.
      */
     val isRunning: CompletableFuture<Boolean>

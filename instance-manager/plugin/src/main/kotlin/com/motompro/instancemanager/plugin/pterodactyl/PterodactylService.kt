@@ -163,13 +163,27 @@ class PterodactylService(
         }
     }
 
-    fun getInstanceStatus(instance: InstanceImpl): CompletableFuture<String> {
+    fun getInstanceApplicationStatus(instance: InstanceImpl): CompletableFuture<String> {
         return CompletableFuture<String>().completeAsync {
-            val request = buildClientRequest("$clientApiUri/servers/${instance.uuid.toString().split("-").first()}")
+            val request = buildApplicationRequest("$applicationApiUri/servers/${instance.id}")
                 .GET()
                 .build()
             val response = sendRequest(request)
-            return@completeAsync response.get("attributes").get("status").asText()
+            val attributes = response.get("attributes")
+            if (attributes.has("status")) {
+                return@completeAsync attributes.get("status").asText()
+            }
+            return@completeAsync "null"
+        }
+    }
+
+    fun getInstanceStatus(instance: InstanceImpl): CompletableFuture<String> {
+        return CompletableFuture<String>().completeAsync {
+            val request = buildClientRequest("$clientApiUri/servers/${instance.uuid.toString().split("-").first()}/resources")
+                .GET()
+                .build()
+            val response = sendRequest(request)
+            return@completeAsync response.get("attributes").get("current_state").asText()
         }
     }
 

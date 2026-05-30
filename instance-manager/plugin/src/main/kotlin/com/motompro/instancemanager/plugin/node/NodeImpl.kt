@@ -29,6 +29,12 @@ class NodeImpl(
 
     override fun createInstance(name: String, specs: InstanceSpecs): CompletableFuture<Instance> {
         return pterodactylService.createInstance(this, name, specs).thenApply { (instance, ip, port) ->
+            var polls = 0
+            while (polls < ONLINE_POLLING_TIMEOUT && !instance.isOnline.join()) {
+                polls++
+                Thread.sleep(3000)
+            }
+            if (polls == ONLINE_POLLING_TIMEOUT) throw IllegalStateException()
             val address = InetSocketAddress(ip, port)
             val serverInfo = ServerInfo(instance.uuid.toString(), address)
             proxy.registerServer(serverInfo)
@@ -41,5 +47,9 @@ class NodeImpl(
         return pterodactylService.deleteInstance(instance as InstanceImpl).thenAccept {
             logger.info("Deleted server ${instance.uuid} on node ${this.name}")
         }
+    }
+
+    companion object {
+        private const val ONLINE_POLLING_TIMEOUT = 100
     }
 }
