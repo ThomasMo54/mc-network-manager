@@ -32,6 +32,7 @@ class InstanceImpl(
         get() = pterodactylService.getInstanceStatus(this).thenApply { it == "running" }
 
     override fun start(): CompletableFuture<Void> {
+        val startTime = System.currentTimeMillis()
         return pterodactylService.sendPowerCommand(this, "start").thenAccept {
             var polls = 0
             while (polls < STATUS_POLLING_TIMEOUT && !isRunning.join()) {
@@ -39,7 +40,8 @@ class InstanceImpl(
                 Thread.sleep(3000)
             }
             if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
-            logger.info("Started instance $uuid")
+            val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
+            logger.info("Started instance $uuid (${String.format("%.1f", elapsedSeconds)}s)")
         }
     }
 
@@ -56,6 +58,7 @@ class InstanceImpl(
     }
 
     override fun restart(): CompletableFuture<Void> {
+        val startTime = System.currentTimeMillis()
         return pterodactylService.sendPowerCommand(this, "restart").thenAccept {
             var polls = 0
             while (polls < STATUS_POLLING_TIMEOUT && !isRunning.join()) {
@@ -63,7 +66,8 @@ class InstanceImpl(
                 Thread.sleep(3000)
             }
             if (polls == STATUS_POLLING_TIMEOUT) throw IllegalStateException()
-            logger.info("Restarted instance $uuid")
+            val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
+            logger.info("Restarted instance $uuid (${String.format("%.1f", elapsedSeconds)}s)")
         }
     }
 

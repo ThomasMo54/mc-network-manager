@@ -28,6 +28,7 @@ class NodeImpl(
         get() = pterodactylService.getNodeInstances(this).thenApply { instances -> instances.associateBy { it.uuid } }
 
     override fun createInstance(name: String, specs: InstanceSpecs): CompletableFuture<Instance> {
+        val startTime = System.currentTimeMillis()
         return pterodactylService.createInstance(this, name, specs).thenApply { (instance, ip, port) ->
             var polls = 0
             while (polls < ONLINE_POLLING_TIMEOUT && !instance.isOnline.join()) {
@@ -35,10 +36,12 @@ class NodeImpl(
                 Thread.sleep(3000)
             }
             if (polls == ONLINE_POLLING_TIMEOUT) throw IllegalStateException()
+            val elapsedSeconds = (System.currentTimeMillis() - startTime) / 1000.0
+            logger.info("Created server ${instance.uuid} on node ${this.name} (${String.format("%.1f", elapsedSeconds)}s")
             val address = InetSocketAddress(ip, port)
             val serverInfo = ServerInfo(instance.uuid.toString(), address)
             proxy.registerServer(serverInfo)
-            logger.info("Registered server ${instance.uuid} at $address on node ${this.name}")
+            logger.info("Registered server ${instance.uuid} at $address")
             return@thenApply instance
         }
     }
