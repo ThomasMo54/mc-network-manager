@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "com.motompro"
-version = "1.0-SNAPSHOT"
+version = providers.gradleProperty("releaseVersion").getOrElse("1.0-SNAPSHOT")
 
 allprojects {
     repositories {
